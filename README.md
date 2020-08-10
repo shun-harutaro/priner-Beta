@@ -10,7 +10,10 @@ pip install PyPDF2
 pip install BeautifulSoup
 ```
 
-### 2
+### 3
 ```
 python3 ~/priner-Beta/main.py
 ```
+
+### 4
+Enter the URL(of Professor's site) and your department, number according to the display
