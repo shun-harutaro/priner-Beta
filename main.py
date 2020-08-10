@@ -1,19 +1,20 @@
 import requests
+from bs4 import BeautifulSoup
 import datetime
+import PyPDF2
 import linecache
 import urllib.request
-from bs4 import BeautifulSoup
-import PyPDF2
+from google.cloud import firestore
 
-def scape(d):
-    res = requests.get(f'http://math.dge.toyota-ct.ac.jp/katsutani/lssn/2020/ba2/wkprntans/index-f2{d}.html')
+def scape(d,root):
+    res = requests.get(root+f'wkprntans/index-f2{d}.html')
     soup = BeautifulSoup(res.text, 'html.parser')
     source = soup.find_all('a')
     links = [url.get('href') for url in source]
     texts = [url.get_text() for url in source]
     return links,texts
 
-def correct(d,num,urls,texts):
+def correct(root,d,num,urls,texts):
     count=-1
     l=[]
     urls_in=[s for s in urls if d+str(num) in s]
@@ -21,7 +22,7 @@ def correct(d,num,urls,texts):
         if count==-1:
             pass
         else:
-            url = f'http://math.dge.toyota-ct.ac.jp/katsutani/lssn/2020/ba2/wkprntans/'+n
+            url = root+'/wkprntans/'+n
             savename = "print.pdf"
             urllib.request.urlretrieve(url, savename)
             with open(savename, "rb") as f:
@@ -38,6 +39,7 @@ def correct(d,num,urls,texts):
     return l
 
 while True:
+    root = input("教員サイトのトップページのURLを入力(最後が'/◯◯2/'になるように)")
     d = input("学科を入力(m or i)")
     if d == "m" or d == "i":
         num = int(input("出席番号を入力(半角2ケタ)"))
@@ -49,8 +51,8 @@ if d=="m":
 else:
     department="情報工学科"
 
-urls,texts = scape(d)
-ml=correct(d,num,urls,texts)
+urls,texts = scape(d,root)
+ml=correct(root,d,num,urls,texts)
 print(f"{department} {num}番の該当正解数の推移")
 for i in range(len(ml)):
     print(ml[i][0]+"=>%3d問"%int(ml[i][1]))
